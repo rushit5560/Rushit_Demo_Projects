@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'collage_screen_controller.dart';
 
 class CollageScreen extends StatefulWidget {
   const CollageScreen({Key? key}) : super(key: key);
@@ -9,9 +12,10 @@ class CollageScreen extends StatefulWidget {
   _CollageScreenState createState() => _CollageScreenState();
 }
 class _CollageScreenState extends State<CollageScreen> {
+  CollageScreenController collageScreenController = Get.put(CollageScreenController());
   final ImagePicker _picker = ImagePicker();
-  List<XFile> imageFileList = [];
-  int selectedIndex = 0;
+  // List<XFile> imageFileList = [];
+  // int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class _CollageScreenState extends State<CollageScreen> {
         ],
       ),
 
-      body: imageFileList.isNotEmpty
+      body: collageScreenController.imageFileList.isNotEmpty
           ? Column(
               children: [
                 Expanded(
@@ -34,8 +38,9 @@ class _CollageScreenState extends State<CollageScreen> {
                   child: Container(
                     color: Colors.black,
                     child: ImageListModule(
-                        imageFileList: imageFileList,
-                        selectedIndex: selectedIndex),
+                        // imageFileList: collageScreenController.imageFileList,
+                        // selectedIndex: collageScreenController.selectedIndex.value,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -43,8 +48,9 @@ class _CollageScreenState extends State<CollageScreen> {
                   child: Container(
                     color: Colors.grey,
                     child: BottomBarModule(
-                        imageFileList: imageFileList,
-                        selectedIndex: selectedIndex),
+                        // imageFileList: collageScreenController.imageFileList,
+                        // selectedIndex: collageScreenController.selectedIndex.value,
+                    ),
                   ),
                 ),
               ],
@@ -60,15 +66,15 @@ class _CollageScreenState extends State<CollageScreen> {
       if(selectedImages!.isEmpty){
       } else {
         setState(() {
-          imageFileList.clear();
-          imageFileList.addAll(selectedImages);
+          collageScreenController.imageFileList.clear();
+          collageScreenController.imageFileList.addAll(selectedImages);
         });
       }
     } catch(e) {
       print('Error : $e');
     }
 
-    print('Images List Length : ${imageFileList.length}');
+    print('Images List Length : ${collageScreenController.imageFileList.length}');
   }
 
   // No Image Selected Text Module
@@ -82,9 +88,10 @@ class _CollageScreenState extends State<CollageScreen> {
 
 // Selected Images Layout
 class ImageListModule extends StatefulWidget {
-  List<XFile> imageFileList;
-  int selectedIndex;
-  ImageListModule({required this.imageFileList, required this.selectedIndex});
+  CollageScreenController collageScreenController = Get.find();
+  // List<XFile> imageFileList;
+  // int selectedIndex;
+  // ImageListModule({required this.imageFileList/*, required this.selectedIndex*/});
   @override
   _ImageListModuleState createState() => _ImageListModuleState();
 }
@@ -92,98 +99,87 @@ class _ImageListModuleState extends State<ImageListModule> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.imageFileList.length == 1
-        ? singleImageSelectedModule()
-        : widget.imageFileList.length == 2
-            ? twoImageSelectedModule(widget.selectedIndex)
-            : Container();
+    return Obx(
+        () => widget.collageScreenController.imageFileList.length == 1
+            ? singleImageSelectedModule()
+            : widget.collageScreenController.imageFileList.length == 2
+            ? twoImageSelectedModule(widget.collageScreenController.selectedIndex.value)
+            : Container(),
+    );
   }
 
   Widget singleImageSelectedModule() {
     return Container(
-      child: Image.file(File('${widget.imageFileList[0].path}')),
+      child: Image.file(File('${widget.collageScreenController.imageFileList[0].path}')),
     );
   }
 
   // When Selected Two Images That Time Layouts
   Widget twoImageSelectedModule(int selectedIndex) {
-    // return selectedIndex == 0
-    //     ? Container(
-    //         child: Row(
-    //           children: [
-    //             Expanded(
-    //               child: Container(
-    //                 child: Image.file(File('${widget.imageFileList[0].path}')),
-    //               ),
-    //             ),
-    //             Expanded(
-    //               child: Container(
-    //                 child: Image.file(File('${widget.imageFileList[1].path}')),
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //       )
-    //     : selectedIndex == 1
-    //         ? Container(
-    //             child: Column(
-    //               children: [
-    //                 Expanded(
-    //                   child: Container(
-    //                     child:
-    //                         Image.file(File('${widget.imageFileList[0].path}')),
-    //                   ),
-    //                 ),
-    //                 Expanded(
-    //                   child: Container(
-    //                     child:
-    //                         Image.file(File('${widget.imageFileList[1].path}')),
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           )
-    //         : Container(
-    //             child: Row(
-    //               children: [
-    //                 Expanded(
-    //                   child: Container(
-    //                     child:
-    //                         Image.file(File('${widget.imageFileList[0].path}')),
-    //                   ),
-    //                 ),
-    //                 Expanded(
-    //                   child: Container(
-    //                     child:
-    //                         Image.file(File('${widget.imageFileList[1].path}')),
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           );
-    return Container(
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              child: Image.file(File('${widget.imageFileList[0].path}')),
-            ),
+    return Obx(
+        ()=> selectedIndex == 0
+            ? Container(
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  child: Image.file(File('${widget.collageScreenController.imageFileList[0].path}')),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  child: Image.file(File('${widget.collageScreenController.imageFileList[1].path}')),
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Container(
-              child: Image.file(File('${widget.imageFileList[1].path}')),
-            ),
+        )
+            : selectedIndex == 1
+            ? Container(
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  child:
+                  Image.file(File('${widget.collageScreenController.imageFileList[0].path}')),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  child:
+                  Image.file(File('${widget.collageScreenController.imageFileList[1].path}')),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        )
+            : Container(
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  child:
+                  Image.file(File('${widget.collageScreenController.imageFileList[0].path}')),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  child:
+                  Image.file(File('${widget.collageScreenController.imageFileList[1].path}')),
+                ),
+              ),
+            ],
+          ),
+        ),
     );
   }
 }
 
 class BottomBarModule extends StatefulWidget {
-  List<XFile> imageFileList;
-  int selectedIndex;
-  BottomBarModule({required this.imageFileList, required this.selectedIndex});
+  CollageScreenController collageScreenController = Get.find();
+  // List<XFile> imageFileList;
+  // int selectedIndex;
+  // BottomBarModule({required this.imageFileList/*, required this.selectedIndex*/});
 
   @override
   _BottomBarModuleState createState() => _BottomBarModuleState();
@@ -191,7 +187,7 @@ class BottomBarModule extends StatefulWidget {
 class _BottomBarModuleState extends State<BottomBarModule> {
   @override
   Widget build(BuildContext context) {
-    return widget.imageFileList.length == 2 ? twoImageSelectCollageModule(widget.selectedIndex) : Container();
+    return widget.collageScreenController.imageFileList.length == 2 ? twoImageSelectCollageModule(widget.collageScreenController.selectedIndex.value) : Container();
   }
 
 
@@ -228,28 +224,3 @@ class _BottomBarModuleState extends State<BottomBarModule> {
     );
   }
 }
-
-
-
-
-
-
-// -----> Selected Images Set in GridView
-// Widget imageListModule() {
-//   return Padding(
-//     padding: const EdgeInsets.all(8.0),
-//     child: GridView.builder(
-//       itemCount: _imageFileList!.length,
-//       shrinkWrap: true,
-//       physics: BouncingScrollPhysics(),
-//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//         crossAxisCount: 2,
-//         crossAxisSpacing: 15,
-//         mainAxisSpacing: 15,
-//       ),
-//       itemBuilder: (context, index){
-//         return Image.file(File(_imageFileList![index].path), fit: BoxFit.cover);
-//       },
-//     ),
-//   );
-// }
