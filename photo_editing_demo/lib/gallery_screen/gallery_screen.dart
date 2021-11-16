@@ -1,48 +1,29 @@
 import 'dart:io';
-
+import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photofilters/photofilters.dart';
+import 'package:image/image.dart' as imageLib;
 
-enum AppState {
-  free,
-  picked,
-  cropped,
-}
 
 class GalleryScreen extends StatefulWidget {
-  // const GalleryScreen({Key? key}) : super(key: key);
   @override
   _GalleryScreenState createState() => _GalleryScreenState();
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
-  //File? file;
   final ImagePicker imagePicker = ImagePicker();
-  AppState ? state;
-  File ? imageFile;
 
-  @override
-  void initState() {
-    super.initState();
-    state = AppState.free;
-  }
+  File ? imageFile;
+  List<Filter> filters = presetFiltersList;
+  String? fileName;
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /* floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepOrange,
-        onPressed: () {
-          if (state == AppState.free)
-            gallery();
-          else if (state == AppState.picked)
-            _cropImage();
-          // else if (state == AppState.cropped) _clearImage();
-        },
-        child: _buildButtonIcon(),
-      ),*/
       appBar: AppBar(
         title: Text('Gallery'),
         centerTitle: true,
@@ -53,46 +34,55 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ],
       ),
 
-      body: Column(
-        children: [
-          imageFile != null
-              ? Expanded(
-            flex: 9,
-                child: Container(
-            height: Get.height * 0.75,
-            width: Get.width,
-            child: imageFile != null
-                  ? Image.file(
-                  imageFile!, height: 100, width: 100, fit: BoxFit.fill)
-                  : null,
-          ),
-              )
-              : Container(
-            child: Center(
-              child: Text('No Image Selected', textScaleFactor: 1.3,),
-            ),
-          ),
-
-
-          Expanded(
-              flex: 1,
-            child: Container(
-              margin: EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: imageFile != null
+          ? Container(
+              child: Column(
                 children: [
-                  IconButton(
-                      onPressed: () {
-                        _cropImage();
-                      },
-                      icon: Icon(Icons.crop, color: Colors.blue, size: 30,))
+                  Expanded(
+                    flex: 9,
+                    child: Container(
+                      height: Get.height * 0.75,
+                      width: Get.width,
+                      color: Colors.black,
+                      child: imageFile != null
+                          ? Image.file(imageFile!, /*fit: BoxFit.fill*/)
+                          : null,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10, right: 10),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              await cropImage();
+                            },
+                            icon: Icon(Icons.crop),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              await filterImage(context);
+                            },
+                            icon: Icon(Icons.filter_alt_rounded),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
+            )
+          : Container(
+              child: Center(
+                child: Text(
+                  'No Image Selected',
+                  textScaleFactor: 1.3,
+                ),
+              ),
             ),
-          ),
 
-        ],
-      ),
     );
   }
 
@@ -101,12 +91,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
     imageFile = image != null ? File(image.path) : null;
     if (imageFile != null) {
       setState(() {
-        state = AppState.picked;
+        // state = AppState.picked;
       });
     }
   }
 
-  Future<Null> _cropImage() async {
+  Future<Null> cropImage() async {
     File ? croppedFile = await ImageCropper.cropImage(
         sourcePath: imageFile!.path,
         aspectRatioPresets: Platform.isAndroid
@@ -139,26 +129,33 @@ class _GalleryScreenState extends State<GalleryScreen> {
     if (croppedFile != null) {
       imageFile = croppedFile;
       setState(() {
-        state = AppState.cropped;
+        // state = AppState.cropped;
       });
     }
   }
 
-  void _clearImage() {
-    imageFile = null;
-    setState(() {
-      state = AppState.free;
-    });
-  }
-
-  Widget _buildButtonIcon() {
-    if (state == AppState.free)
-      return Icon(Icons.add);
-    else if (state == AppState.picked)
-      return Icon(Icons.crop);
-    else if (state == AppState.cropped)
-      return Icon(Icons.clear);
-    else
-      return Container();
+  Future filterImage(context) async {
+    fileName = basename(imageFile!.path);
+    var image = imageLib.decodeImage(imageFile!.readAsBytesSync());
+    image = imageLib.copyResize(image!, width: 600);
+    Map imagefile = await Navigator.push(
+      context,
+      new MaterialPageRoute(
+        builder: (context) => new PhotoFilterSelector(
+          title: Text("Photo Filter Example"),
+          image: image!,
+          filters: presetFiltersList,
+          filename: fileName!,
+          loader: Center(child: CircularProgressIndicator()),
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+    if (imagefile.isNotEmpty && imagefile.containsKey('image_filtered')) {
+      setState(() {
+        imageFile = imagefile['image_filtered'];
+      });
+      print(imageFile!.path);
+    }
   }
 }

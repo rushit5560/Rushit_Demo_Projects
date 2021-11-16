@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:image/image.dart' as imageLib;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:photofilters/photofilters.dart';
@@ -14,52 +15,63 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   File? file;
   final ImagePicker imagePicker = ImagePicker();
+  List<Filter> filters = presetFiltersList;
+  String? fileName;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: Text('Camera'),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () => camera(),
-          icon: Icon(Icons.camera_alt_rounded),
+          IconButton(
+            onPressed: () => camera(),
+            icon: Icon(Icons.camera_alt_rounded),
           ),
         ],
       ),
-
       body: file != null
-      ? Container(
-        child: Column(
+          ? Container(
+              child: Column(
                 children: [
                   Expanded(
                     flex: 9,
                     child: Container(
-                      // height:Get.height,
+                      color: Colors.black,
                       width: Get.width,
                       child: file != null
-                          ? Image.file(file!, fit: BoxFit.fill)
+                          ? Image.file(file!)
                           : null,
                     ),
                   ),
                   Expanded(
                     flex: 1,
-                    child: IconButton(
-                      onPressed: () async {
-                        await getImage(context);
-                      },
-                      icon: Icon(Icons.filter_alt_rounded),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            await _cropImage();
+                          },
+                          icon: Icon(Icons.crop),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            await filterImage(context);
+                          },
+                          icon: Icon(Icons.filter_alt_rounded),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-      )
-      : Container(
-        child: Center(
-          child: Text('No Image Selected', textScaleFactor: 1.3),
-        ),
-      ),
+            )
+          : Container(
+              child: Center(
+                child: Text('No Image Selected', textScaleFactor: 1.3),
+              ),
+            ),
     );
   }
 
@@ -73,10 +85,8 @@ class _CameraScreenState extends State<CameraScreen> {
     } else {}
   }
 
-  List<Filter> filters = presetFiltersList;
-  String ? fileName;
-
-  Future getImage(context) async {
+  // Add Filter in Image
+  Future filterImage(context) async {
     fileName = basename(file!.path);
     var image = imageLib.decodeImage(file!.readAsBytesSync());
     image = imageLib.copyResize(image!, width: 600);
@@ -101,38 +111,42 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    file!.delete();
-    super.dispose();
+  // Image Crop Function
+  Future<Null> _cropImage() async {
+    File ? croppedFile = await ImageCropper.cropImage(
+        sourcePath: file!.path,
+        aspectRatioPresets: Platform.isAndroid
+        ? [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9
+        ]
+        : [
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio5x3,
+        CropAspectRatioPreset.ratio5x4,
+        CropAspectRatioPreset.ratio7x5,
+        CropAspectRatioPreset.ratio16x9
+        ],
+        androidUiSettings: AndroidUiSettings(
+            toolbarTitle: 'Crop',
+            toolbarColor: Colors.deepOrange,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false),
+        iosUiSettings: IOSUiSettings(
+          title: 'Crop',
+        ));
+    if (croppedFile != null) {
+      file = croppedFile;
+      setState(() {
+        // state = AppState.cropped;
+      });
+    }
   }
-
- // Future filterImage() async {
- //   print('FILE PATH : ${file!.path}');
- //    imagefile = await imagePicker.getImage(source: ImageSource.camera);
- //   fileName = file!.path;
- //   // var image = imageLib.decodeImage(imagefile!.readAsBytesSync());
- //   // var image = imageLib.copyResize(image!, width: 600);
- //   Map imageFile = await Navigator.push(
- //     context,
- //       MaterialPageRoute(
- //           builder: (context) => PhotoFilterSelector(
- //             filename: fileName!,
- //             filters: filters,
- //             image: imagefile!,
- //             title: Text("Photo Filter"),
- //             loader: Center(child: CircularProgressIndicator()),
- //             fit: BoxFit.contain,
- //           ),
- //       ),
- //   );
- //
- //   if (imageFile.isNotEmpty && imageFile.containsKey('image_filtered')) {
- //     setState(() {
- //       imagefile = imageFile['image_filtered'];
- //     });
- //     print("File Path : ${imagefile!.path}");
- //   }
- //
- // }
 }
