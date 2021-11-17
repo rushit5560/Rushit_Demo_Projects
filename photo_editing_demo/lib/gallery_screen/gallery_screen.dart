@@ -40,112 +40,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ],
       ),
 
-      // Main Body Part Here
-      /*body: imageFile != null
-          ? Container(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 9,
-              child: Container(
-                height: Get.height * 0.75,
-                width: Get.width,
-                color: Colors.black,
-                child: imageFile != null
-                    ? Image.file(imageFile!, fit: BoxFit.fill)
-                    : null,
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Container(
-                margin: EdgeInsets.only(left: 10, right: 10),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        await cropImage();
-                      },
-                      icon: Icon(Icons.crop),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        await filterImage(context);
-                      },
-                      icon: Icon(Icons.filter_alt_rounded),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      )
-          : Container(
-        child: Center(
-          child: Text(
-            'No Image Selected',
-            textScaleFactor: 1.3,
-          ),
-        ),
-      ),*/
-      // Main Body Part End Here
-
-      /*body: Column(
-        children: [
-          imageFile != null
-              ? Expanded(
-                  flex: 9,
-                  child: Container(
-                    //height: Get.height * 0.75,
-                    width: Get.width,
-                    child: imageFile != null
-                        ? Image.file(imageFile!,
-                        fit: BoxFit.fill)
-                        : null,
-                  ),
-                )
-              : Container(
-                  child: Center(
-                    child: Text(
-                      'No Image Selected',
-                      textScaleFactor: 1.3,
-                    ),
-                  ),
-                ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              margin: EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        _cropImage();
-                      },
-                      icon: Icon(
-                        Icons.crop,
-                        color: Colors.blue,
-                        size: 30,
-                      )),
-
-                  IconButton(
-                    onPressed: () async {
-                      await filterImage(context);
-                    },
-                    icon: Icon(Icons.filter_alt_rounded),
-                  ),
-
-
-                ],
-              ),
-            )
-
-          ),
-        ],
-      ),*/
-
       body: imageFile != null
           ? Container(
               child: Column(
@@ -196,6 +90,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
+  // Getting the image from the Gallery
   void gallery() async {
     final image = await imagePicker.pickImage(source: ImageSource.gallery);
     imageFile = image != null ? File(image.path) : null;
@@ -206,6 +101,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
   }
 
+  // Crop The Image Portion
   Future<Null> _cropImage() async {
     File? croppedFile = await ImageCropper.cropImage(
         sourcePath: imageFile!.path,
@@ -244,6 +140,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
   }
 
+  // Filter The Image Portion
   Future filterImage(context) async {
     fileName = basename(imageFile!.path);
     var image = imageLib.decodeImage(imageFile!.readAsBytesSync());

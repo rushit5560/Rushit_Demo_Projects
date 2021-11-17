@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'dart:async';
+
+import 'package:flutter/rendering.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image/image.dart' as imageLib;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +20,13 @@ class _CameraScreenState extends State<CameraScreen> {
   final ImagePicker imagePicker = ImagePicker();
   List<Filter> filters = presetFiltersList;
   String? fileName;
+  GlobalKey _globalKey = GlobalKey();
+
+  // @override
+  // void initState() {
+  //   requestPermission();
+  //   super.initState();
+  // }
 
 
   @override
@@ -31,8 +41,8 @@ class _CameraScreenState extends State<CameraScreen> {
             icon: Icon(Icons.camera_alt_rounded),
           ),
           IconButton(
-            onPressed: () {
-              getFilePath();
+            onPressed: () async {
+              await saveImage();
             },
             icon: Icon(Icons.save),
           ),
@@ -157,14 +167,21 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  // Save the Image
-  Future getFilePath() async {
-  String appDocumentsPath = file!.path;
-    String filePath = "PhotoEditing$appDocumentsPath";
-    File file1 = File(filePath);
-    print('file1 : $file1');
+
+  Future saveImage() async {
+    // renameImage();
+    await GallerySaver.saveImage(file!.path, albumName: "PhotoEditingDemoRushit");
   }
 
- // Save the Image
+  // Future renameImage() async {
+  //   String ogPath = file!.path;
+  //   List<String> ogPathList = ogPath.split('/');
+  //   String ogExt = ogPathList[ogPathList.length - 1].split('.')[1];
+  //   DateTime today = new DateTime.now();
+  //   String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
+  //   file = await file!.rename("PhotoEditingDemo_$dateSlug.$ogExt");
+  //   print('File : $file');
+  //   print('File Path : ${file!.path}');
+  // }
 
 }
