@@ -1,12 +1,8 @@
 import 'dart:io';
-
+import 'package:extended_image/extended_image.dart';
 import 'package:path/path.dart';
-
 import 'dart:typed_data';
-
-//import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photofilters/photofilters.dart';
@@ -16,7 +12,6 @@ class GalleryScreen extends StatefulWidget {
   @override
   _GalleryScreenState createState() => _GalleryScreenState();
 }
-
 class _GalleryScreenState extends State<GalleryScreen> {
   final ImagePicker imagePicker = ImagePicker();
 
@@ -25,6 +20,42 @@ class _GalleryScreenState extends State<GalleryScreen> {
   String? fileName;
   Uint8List? targetlUinit8List;
   Uint8List? originalUnit8List;
+  double bright = 0;
+  double sat = 1;
+  GlobalKey<ExtendedImageEditorState> editorKey = GlobalKey();
+
+  double con = 1;
+
+  final defaultColorMatrix = const <double>[
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ];
+
+  List<double> calculateContrastMatrix(double contrast) {
+    final m = List<double>.from(defaultColorMatrix);
+    m[0] = contrast;
+    m[6] = contrast;
+    m[12] = contrast;
+    return m;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +75,65 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ? Container(
               child: Column(
                 children: [
+                  // Expanded(
+                  //   flex: 7,
+                  //   child: Container(
+                  //     //height: Get.height * 0.75,
+                  //     width: Get.width,
+                  //     child: imageFile != null
+                  //         ? Image.file(imageFile!, fit: BoxFit.fill)
+                  //         : null,
+                  //   ),
+                  // ),
                   Expanded(
-                    flex: 9,
-                    child: Container(
-                      //height: Get.height * 0.75,
-                      width: Get.width,
-                      child: imageFile != null
-                          ? Image.file(imageFile!, fit: BoxFit.fill)
-                          : null,
+                    flex: 7,
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.matrix(calculateContrastMatrix(con)),
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.matrix(calculateSaturationMatrix(sat)),
+                          child: ExtendedImage(
+                            color: bright > 0
+                                ? Colors.white.withOpacity(bright)
+                                : Colors.black.withOpacity(-bright),
+                            colorBlendMode: bright > 0 ? BlendMode.lighten : BlendMode.darken,
+                            image: ExtendedFileImageProvider(imageFile!),
+                            height: MediaQuery.of(context).size.width,
+                            width: MediaQuery.of(context).size.width,
+                            extendedImageEditorKey: editorKey,
+                            mode: ExtendedImageMode.editor,
+                            fit: BoxFit.contain,
+                            initEditorConfigHandler: (ExtendedImageState ? state) {
+                              return EditorConfig(
+                                maxScale: 8.0,
+                                cropRectPadding: const EdgeInsets.all(20.0),
+                                hitTestSize: 20.0,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: SliderTheme(
+                      data: const SliderThemeData(
+                        showValueIndicator: ShowValueIndicator.never,
+                      ),
+                      child: Container(
+                        color: Colors.white,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Spacer(flex: 1),
+                            _buildSat(context),
+                            Spacer(flex: 1),
+                            _buildBrightness(context),
+                            Spacer(flex: 1),
+                            _buildCon(context),
+                            //Spacer(flex: 3),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -87,6 +169,158 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 child: Text('No Image Selected', textScaleFactor: 1.3),
               ),
             ),
+    );
+  }
+
+  List<double> calculateSaturationMatrix(double saturation) {
+    final m = List<double>.from(defaultColorMatrix);
+    final invSat = 1 - saturation;
+    final R = 0.213 * invSat;
+    final G = 0.715 * invSat;
+    final B = 0.072 * invSat;
+
+    m[0] = R + saturation;
+    m[1] = G;
+    m[2] = B;
+    m[5] = R;
+    m[6] = G + saturation;
+    m[7] = B;
+    m[10] = R;
+    m[11] = G;
+    m[12] = B + saturation;
+
+    return m;
+  }
+
+  Widget _buildCon(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.03,
+        ),
+        Column(
+          children: <Widget>[
+            Icon(
+              Icons.color_lens,
+              color: Theme.of(context).accentColor,
+            ),
+            Text(
+              "Contrast",
+              style: TextStyle(color: Theme.of(context).accentColor),
+            )
+          ],
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: Slider(
+            label: 'con : ${con.toStringAsFixed(2)}',
+            onChanged: (double value) {
+              setState(() {
+                con = value;
+              });
+            },
+            divisions: 50,
+            value: con,
+            min: 0,
+            max: 4,
+          ),
+        ),
+        Padding(
+          padding:
+          EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
+          child: Text(con.toStringAsFixed(2)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSat(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.03,
+        ),
+        Column(
+          children: <Widget>[
+            Icon(
+              Icons.brush,
+              color: Theme.of(context).accentColor,
+            ),
+            Text(
+              "Saturation",
+              style: TextStyle(color: Theme.of(context).accentColor),
+            )
+          ],
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: Slider(
+            label: 'sat : ${sat.toStringAsFixed(2)}',
+            onChanged: (double value) {
+              setState(() {
+                sat = value;
+              });
+            },
+            divisions: 50,
+            value: sat,
+            min: 0,
+            max: 2,
+          ),
+        ),
+        Padding(
+          padding:
+          EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
+          child: Text(sat.toStringAsFixed(2)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBrightness(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.03,
+        ),
+        Column(
+          children: <Widget>[
+            Icon(
+              Icons.brightness_4,
+              color: Theme.of(context).accentColor,
+            ),
+            Text(
+              "Brightness",
+              style: TextStyle(color: Theme.of(context).accentColor),
+            )
+          ],
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: Slider(
+            label: '${bright.toStringAsFixed(2)}',
+            onChanged: (double value) {
+              setState(() {
+                bright = value;
+              });
+            },
+            divisions: 50,
+            value: bright,
+            min: -1,
+            max: 1,
+          ),
+        ),
+        Padding(
+          padding:
+          EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
+          child: Text(bright.toStringAsFixed(2)),
+        ),
+      ],
     );
   }
 
