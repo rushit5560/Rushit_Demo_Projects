@@ -87,7 +87,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   void gallery() async {
-    final image = await imagePicker.getImage(source: ImageSource.gallery);
+    final image = await imagePicker.pickImage(source: ImageSource.gallery);
     imageFile = image != null ? File(image.path) : null;
     if (imageFile != null) {
       setState(() {

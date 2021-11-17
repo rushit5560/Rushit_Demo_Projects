@@ -18,6 +18,7 @@ class _CameraScreenState extends State<CameraScreen> {
   List<Filter> filters = presetFiltersList;
   String? fileName;
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +29,12 @@ class _CameraScreenState extends State<CameraScreen> {
           IconButton(
             onPressed: () => camera(),
             icon: Icon(Icons.camera_alt_rounded),
+          ),
+          IconButton(
+            onPressed: () {
+              getFilePath();
+            },
+            icon: Icon(Icons.save),
           ),
         ],
       ),
@@ -77,7 +84,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   // Getting Image From Camera
   void camera() async {
-    final image = await imagePicker.getImage(source: ImageSource.camera);
+    final image = await imagePicker.pickImage(source: ImageSource.camera);
     if (image != null) {
       setState(() {
         file = File(image.path);
@@ -149,4 +156,15 @@ class _CameraScreenState extends State<CameraScreen> {
       });
     }
   }
+
+  // Save the Image
+  Future getFilePath() async {
+  String appDocumentsPath = file!.path;
+    String filePath = "PhotoEditing$appDocumentsPath";
+    File file1 = File(filePath);
+    print('file1 : $file1');
+  }
+
+ // Save the Image
+
 }
