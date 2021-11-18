@@ -75,6 +75,14 @@ class _ExtraScreenState extends State<ExtraScreen> {
     } else {}
   }
 
+  _shareImage() async {
+    try{
+
+    } catch(e) {
+      print('Share Error : $e');
+    }
+  }
+
   // Open Alert Dialog
   // openAlertDialogBox() async {
   //   return showDialog(

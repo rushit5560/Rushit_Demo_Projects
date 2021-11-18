@@ -39,6 +39,7 @@ dependencies:
   photo_view: ^0.13.0
   neon: ^0.1.0
   image_editor: ^1.0.1
+  share: ^2.0.4
 
 
 dev_dependencies:

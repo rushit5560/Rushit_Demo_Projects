@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image/image.dart' as imageLib;
 import 'package:flutter/material.dart';
@@ -8,7 +10,9 @@ import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photofilters/photofilters.dart';
+import 'package:share/share.dart';
 
 
 class CameraScreen extends StatefulWidget {
@@ -34,10 +38,12 @@ class _CameraScreenState extends State<CameraScreen> {
             icon: Icon(Icons.camera_alt_rounded),
           ),
           IconButton(
-            onPressed: () async {
-              await saveImage();
-            },
+            onPressed: () async => await saveImage(),
             icon: Icon(Icons.save),
+          ),
+          IconButton(
+            onPressed: () async => await shareImage(),
+            icon: Icon(Icons.share),
           ),
         ],
       ),
@@ -163,13 +169,22 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  shareImage() async {
+    try{
+      // final ByteData bytes = await rootBundle.load('${file!.path}');
+      await Share.shareFiles(['${file!.path}']);
+
+    } catch(e) {
+      print('Share Error : $e');
+    }
+  }
+
 
   // Image Save Module
   Future saveImage() async {
-    renameImage();
+    // renameImage();
     await GallerySaver.saveImage(file!.path, albumName: "OTWPhotoEditingDemo");
   }
-
   Future renameImage() async {
     String ogPath = file!.path;
     List<String> ogPathList = ogPath.split('/');
