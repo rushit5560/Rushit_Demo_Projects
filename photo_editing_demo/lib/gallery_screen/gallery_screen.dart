@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:extended_image/extended_image.dart';
-import 'package:get/get.dart';
 import 'package:neon/neon.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -75,6 +75,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
           IconButton(
             onPressed: () => gallery(),
             icon: Icon(Icons.camera_alt_rounded),
+          ),
+          IconButton(
+            onPressed: () async {
+              await saveImage();
+            },
+            icon: Icon(Icons.save),
           ),
         ],
       ),
@@ -458,6 +464,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
       });
       print(imageFile!.path);
     }
+  }
+
+  // Image Save Module
+  Future saveImage() async {
+    // renameImage();
+    await GallerySaver.saveImage(imageFile!.path, albumName: "OTWPhotoEditingDemo");
   }
 
 /*Future _resizeImage() async {

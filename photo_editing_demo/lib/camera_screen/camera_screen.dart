@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image/image.dart' as imageLib;
@@ -11,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:photofilters/photofilters.dart';
 
+
 class CameraScreen extends StatefulWidget {
   @override
   _CameraScreenState createState() => _CameraScreenState();
@@ -20,13 +20,6 @@ class _CameraScreenState extends State<CameraScreen> {
   final ImagePicker imagePicker = ImagePicker();
   List<Filter> filters = presetFiltersList;
   String? fileName;
-  GlobalKey _globalKey = GlobalKey();
-
-  // @override
-  // void initState() {
-  //   requestPermission();
-  //   super.initState();
-  // }
 
 
   @override
@@ -117,6 +110,7 @@ class _CameraScreenState extends State<CameraScreen> {
           filename: fileName!,
           loader: Center(child: CircularProgressIndicator()),
           fit: BoxFit.contain,
+          circleShape: false,
         ),
       ),
     );
@@ -125,6 +119,8 @@ class _CameraScreenState extends State<CameraScreen> {
         file = imagefile['image_filtered'];
       });
       print(file!.path);
+    } else if(imagefile.isEmpty) {
+      file = file;
     }
   }
 
@@ -168,20 +164,21 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
 
+  // Image Save Module
   Future saveImage() async {
-    // renameImage();
-    await GallerySaver.saveImage(file!.path, albumName: "PhotoEditingDemoRushit");
+    renameImage();
+    await GallerySaver.saveImage(file!.path, albumName: "OTWPhotoEditingDemo");
   }
 
-  // Future renameImage() async {
-  //   String ogPath = file!.path;
-  //   List<String> ogPathList = ogPath.split('/');
-  //   String ogExt = ogPathList[ogPathList.length - 1].split('.')[1];
-  //   DateTime today = new DateTime.now();
-  //   String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
-  //   file = await file!.rename("PhotoEditingDemo_$dateSlug.$ogExt");
-  //   print('File : $file');
-  //   print('File Path : ${file!.path}');
-  // }
+  Future renameImage() async {
+    String ogPath = file!.path;
+    List<String> ogPathList = ogPath.split('/');
+    String ogExt = ogPathList[ogPathList.length - 1].split('.')[1];
+    DateTime today = new DateTime.now();
+    String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
+    file = await file!.rename("PhotoEditingDemo_$dateSlug.$ogExt");
+    print('File : $file');
+    print('File Path : ${file!.path}');
+  }
 
 }

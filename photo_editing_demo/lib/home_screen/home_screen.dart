@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_editing_demo/collage_screen/collage_screen.dart';
 import 'package:photo_editing_demo/gallery_screen/gallery_screen.dart';
+import 'package:photo_editing_demo/zz_extra_screen/extra_screen.dart';
 import '../camera_screen/camera_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -92,6 +93,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                   child: Text(
                     'Collage',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // Extra
+            GestureDetector(
+              onTap: () {
+                Get.to(()=> ExtraScreen());
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                  child: Text(
+                    'Extra Screen',
                     style: TextStyle(
                       color: Colors.white,
                     ),
