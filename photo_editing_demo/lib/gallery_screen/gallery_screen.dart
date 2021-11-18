@@ -1,10 +1,14 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:extended_image/extended_image.dart';
+import 'package:get/get.dart';
+import 'package:neon/neon.dart';
 import 'package:path/path.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:image/image.dart' as imageLib;
 
@@ -24,8 +28,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
   double sat = 1;
   GlobalKey<ExtendedImageEditorState> editorKey = GlobalKey();
 
-  double con = 1;
+  TextEditingController neonText= TextEditingController();
 
+  double con = 1;
+  bool ? isBrightness;
+  bool ? isBlur;
   final defaultColorMatrix = const <double>[
     1,
     0,
@@ -56,6 +63,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     m[12] = contrast;
     return m;
   }
+  double blurImage = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +93,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   //         : null,
                   //   ),
                   // ),
-                  Expanded(
-                    flex: 7,
-                      child: ColorFiltered(
+                  Stack(
+                    children: [
+                      ColorFiltered(
                         colorFilter: ColorFilter.matrix(calculateContrastMatrix(con)),
                         child: ColorFiltered(
                           colorFilter: ColorFilter.matrix(calculateSaturationMatrix(sat)),
@@ -112,30 +120,25 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           ),
                         ),
                       ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: SliderTheme(
-                      data: const SliderThemeData(
-                        showValueIndicator: ShowValueIndicator.never,
-                      ),
-                      child: Container(
-                        color: Colors.white,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Spacer(flex: 1),
-                            _buildSat(context),
-                            Spacer(flex: 1),
-                            _buildBrightness(context),
-                            Spacer(flex: 1),
-                            _buildCon(context),
-                            //Spacer(flex: 3),
-                          ],
+                      
+                      Positioned.fill(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: blurImage, sigmaY: blurImage ),
+                          child: Container(color: Colors.transparent,),
                         ),
-                      ),
-                    ),
+                      )
+                    ],
                   ),
+
+                  isBlur == true ?
+                  Slider(
+                    value: blurImage,
+                    max: 30,
+                    onChanged: (value) => setState(() => blurImage = value),
+                  )
+                  : Container(),
+
+                  isBrightness == true ? brightness(context) : Container(),
                   Expanded(
                       flex: 1,
                       child: Container(
@@ -158,6 +161,31 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               },
                               icon: Icon(Icons.filter_alt_rounded),
                             ),
+
+                            IconButton(
+                              onPressed: ()  {
+                                setState(() {
+                                  isBrightness = true;
+                                });
+                              },
+                              icon: Icon(Icons.brightness_4),
+                            ),
+
+                            IconButton(
+                              onPressed: ()  {
+                                zoomImage();
+                              },
+                              icon: Icon(Icons.zoom_out),
+                            ),
+
+                            IconButton(
+                              onPressed: ()  {
+                                setState(() {
+                                  isBlur = true;
+                                });
+                              },
+                              icon: Icon(Icons.blur_on),
+                            ),
                           ],
                         ),
                       )),
@@ -169,6 +197,38 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 child: Text('No Image Selected', textScaleFactor: 1.3),
               ),
             ),
+    );
+  }
+
+  zoomImage(){
+    return PhotoView(
+      imageProvider: AssetImage('$imageFile'),
+    );
+  }
+
+  brightness(context){
+    return Expanded(
+      flex: 3,
+      child: SliderTheme(
+        data: const SliderThemeData(
+          showValueIndicator: ShowValueIndicator.never,
+        ),
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Spacer(flex: 1),
+              _buildSat(context),
+              Spacer(flex: 1),
+              _buildBrightness(context),
+              Spacer(flex: 1),
+              _buildCon(context),
+              //Spacer(flex: 3),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
