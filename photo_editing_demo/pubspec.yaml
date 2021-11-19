@@ -41,6 +41,7 @@ dependencies:
   image_editor: ^1.0.1
   share: ^2.0.4
 
+  flutter_image_compress: ^1.1.0
 
 dev_dependencies:
   flutter_test:

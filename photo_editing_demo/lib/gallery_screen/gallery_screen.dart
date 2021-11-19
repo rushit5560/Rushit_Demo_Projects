@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:get/get.dart';
 import 'package:neon/neon.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
@@ -8,31 +10,37 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_editing_demo/compress_screen/compress_screen.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:image/image.dart' as imageLib;
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class GalleryScreen extends StatefulWidget {
   @override
   _GalleryScreenState createState() => _GalleryScreenState();
 }
+
 class _GalleryScreenState extends State<GalleryScreen> {
   final ImagePicker imagePicker = ImagePicker();
-
+  int? index;
   File? imageFile;
+  File? compressFile;
   List<Filter> filters = presetFiltersList;
   String? fileName;
   Uint8List? targetlUinit8List;
   Uint8List? originalUnit8List;
   double bright = 0;
   double sat = 1;
+  ImageProvider? provider;
   GlobalKey<ExtendedImageEditorState> editorKey = GlobalKey();
 
-  TextEditingController neonText= TextEditingController();
+  TextEditingController neonText = TextEditingController();
 
   double con = 1;
-  bool ? isBrightness;
-  bool ? isBlur;
+  bool isBrightness = false;
+  bool isBlur = false;
+  bool isCompress = false;
   final defaultColorMatrix = const <double>[
     1,
     0,
@@ -63,7 +71,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
     m[12] = contrast;
     return m;
   }
+
   double blurImage = 0;
+
+  //File ? file;
 
   @override
   Widget build(BuildContext context) {
@@ -84,117 +95,123 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
         ],
       ),
-
       body: imageFile != null
           ? Container(
               child: Column(
                 children: [
-                  // Expanded(
-                  //   flex: 7,
-                  //   child: Container(
-                  //     //height: Get.height * 0.75,
-                  //     width: Get.width,
-                  //     child: imageFile != null
-                  //         ? Image.file(imageFile!, fit: BoxFit.fill)
-                  //         : null,
-                  //   ),
-                  // ),
-                  Stack(
-                    children: [
-                      ColorFiltered(
-                        colorFilter: ColorFilter.matrix(calculateContrastMatrix(con)),
-                        child: ColorFiltered(
-                          colorFilter: ColorFilter.matrix(calculateSaturationMatrix(sat)),
-                          child: ExtendedImage(
-                            color: bright > 0
-                                ? Colors.white.withOpacity(bright)
-                                : Colors.black.withOpacity(-bright),
-                            colorBlendMode: bright > 0 ? BlendMode.lighten : BlendMode.darken,
-                            image: ExtendedFileImageProvider(imageFile!),
-                            height: MediaQuery.of(context).size.width,
-                            width: MediaQuery.of(context).size.width,
-                            extendedImageEditorKey: editorKey,
-                            mode: ExtendedImageMode.editor,
-                            fit: BoxFit.contain,
-                            initEditorConfigHandler: (ExtendedImageState ? state) {
-                              return EditorConfig(
-                                maxScale: 8.0,
-                                cropRectPadding: const EdgeInsets.all(20.0),
-                                hitTestSize: 20.0,
-                              );
-                            },
+                  Expanded(
+                    flex: 9,
+                    child: Stack(
+                      children: [
+                        ColorFiltered(
+                          colorFilter:
+                              ColorFilter.matrix(calculateContrastMatrix(con)),
+                          child: ColorFiltered(
+                            colorFilter: ColorFilter.matrix(
+                                calculateSaturationMatrix(sat)),
+                            child: ExtendedImage(
+                              color: bright > 0
+                                  ? Colors.white.withOpacity(bright)
+                                  : Colors.black.withOpacity(-bright),
+                              colorBlendMode: bright > 0
+                                  ? BlendMode.lighten
+                                  : BlendMode.darken,
+                              image: ExtendedFileImageProvider(imageFile!),
+                              extendedImageEditorKey: editorKey,
+                              mode: ExtendedImageMode.editor,
+                              fit: BoxFit.contain,
+                              initEditorConfigHandler:
+                                  (ExtendedImageState? state) {
+                                return EditorConfig(
+                                  maxScale: 8.0,
+                                  //cropRectPadding: const EdgeInsets.all(20.0),
+                                  hitTestSize: 20.0,
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      
-                      Positioned.fill(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: blurImage, sigmaY: blurImage ),
-                          child: Container(color: Colors.transparent,),
-                        ),
-                      )
-                    ],
+                        Positioned.fill(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(
+                                sigmaX: blurImage, sigmaY: blurImage),
+                            child: Container(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-
-                  isBlur == true ?
-                  Slider(
-                    value: blurImage,
-                    max: 30,
-                    onChanged: (value) => setState(() => blurImage = value),
-                  )
-                  : Container(),
-
-                  isBrightness == true ? brightness(context) : Container(),
-                  Expanded(
-                      flex: 1,
-                      child: Container(
-                        margin: EdgeInsets.only(left: 10, right: 10),
-                        child: Row(
-                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                                onPressed: () {
-                                  _cropImage();
-                                },
-                                icon: Icon(
-                                  Icons.crop,
-                                  color: Colors.black,
-                                  size: 30,
-                                )),
-                            IconButton(
-                              onPressed: () async {
-                                await filterImage(context);
-                              },
-                              icon: Icon(Icons.filter_alt_rounded),
-                            ),
-
-                            IconButton(
-                              onPressed: ()  {
-                                setState(() {
-                                  isBrightness = true;
-                                });
-                              },
-                              icon: Icon(Icons.brightness_4),
-                            ),
-
-                            IconButton(
-                              onPressed: ()  {
-                                zoomImage();
-                              },
-                              icon: Icon(Icons.zoom_out),
-                            ),
-
-                            IconButton(
-                              onPressed: ()  {
-                                setState(() {
-                                  isBlur = true;
-                                });
-                              },
-                              icon: Icon(Icons.blur_on),
-                            ),
-                          ],
+                  SizedBox(
+                    height: 10,
+                  ),
+                  indexFunction(context),
+                  Container(
+                    margin: EdgeInsets.only(left: 10, right: 10),
+                    child: Row(
+                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              _cropImage();
+                            },
+                            icon: Icon(
+                              Icons.crop,
+                              color: Colors.black,
+                              size: 30,
+                            )),
+                        IconButton(
+                          onPressed: () async {
+                            await filterImage(context);
+                          },
+                          icon: Icon(Icons.filter_alt_rounded),
                         ),
-                      )),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              //isBrightness = true;
+                              index = 1;
+                            });
+                          },
+                          icon: Icon(Icons.brightness_4),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            zoomImage();
+                          },
+                          icon: Icon(Icons.zoom_out),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              //index = 1;
+                              index = 0;
+                              //print(isBlur);
+                            });
+                          },
+                          icon: Icon(Icons.blur_on),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            // setState(() {
+                            //   isCompress = true;
+                            // });
+                            compressImage(imageFile!).then((value) {
+                              Get.to(() => CompressScreen(
+                                        imageFile: imageFile!,
+                                        compressFile: compressFile!,
+                                      ))!
+                                  .then((value) {
+                                // setState(() {});
+                              });
+                            });
+                          },
+                          icon: Icon(Icons.compress_outlined),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )
@@ -206,13 +223,116 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
-  zoomImage(){
+  indexFunction(context) {
+    return Container(
+      child: index == 0
+          ? Slider(
+              value: blurImage,
+              max: 30,
+              onChanged: (value) => setState(() => blurImage = value),
+            )
+          : index == 1
+              ? brightness(context)
+              : Container(),
+    );
+  }
+
+  Future compressImage(File file) async {
+    print("file: $file");
+    final filePath = file.absolute.path;
+    // Create output file path
+    // eg:- "Volume/VM/abcd_out.jpeg"
+    final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: 5,
+    );
+    print("Original path : ${file.lengthSync()}");
+    print(file.absolute.path);
+    print("Compress path : ${result!.lengthSync()}");
+    setState(() {
+      compressFile = result;
+    });
+    setState(() {});
+    print("compressFile: ${compressFile!.lengthSync()}");
+    // setState(() {
+    //
+    // });
+    /*final logger = TimeLogger();
+    logger.startRecoder();
+    print("start compress webp");
+    final quality = 90;
+    final tmpDir = (await getTemporaryDirectory()).path;
+    final target =
+        "$tmpDir/${DateTime.now().millisecondsSinceEpoch}-$quality.webp";
+    final srcPath = await getExampleFilePath();
+    final result = await FlutterImageCompress.compressAndGetFile(
+      srcPath,
+      target,
+      format: CompressFormat.webp,
+      minHeight: 800,
+      minWidth: 800,
+      quality: quality,
+    );
+
+    if (result == null) return;
+
+    print("Compress webp success.");
+    logger.logTime();
+    print("src, path = $srcPath length = ${File(srcPath).lengthSync()}");
+    print(
+        "Compress webp result path: ${result.absolute.path}, size: ${result.lengthSync()}");
+
+    provider = FileImage(result);
+    setState(() {});*/
+  }
+
+  /*Future<Directory> getTemporaryDirectory() async {
+    return Directory.systemTemp;
+  }
+  Future<String> getExampleFilePath() async {
+    final img = AssetImage("assets/images/heart.png");
+    print("pre compress");
+    final config = new ImageConfiguration();
+
+    AssetBundleImageKey key = await img.obtainKey(config);
+    final ByteData data = await key.bundle.load(key.name);
+    final dir = await path_provider.getTemporaryDirectory();
+
+    File file = createFile("${dir.absolute.path}/test.png");
+    file.createSync(recursive: true);
+    file.writeAsBytesSync(data.buffer.asUint8List());
+    return file.absolute.path;
+  }
+  File createFile(String path) {
+    final file = File(path);
+    if (!file.existsSync()) {
+      file.createSync(recursive: true);
+    }
+
+    return file;
+  }*/
+
+  /* compress(){
+    return Container(
+      child: Column(
+        children: [
+          Text("Original file size: ${File(srcPath).lengthSync()}");
+        ],
+      ),
+    );
+  }*/
+
+  zoomImage() {
     return PhotoView(
       imageProvider: AssetImage('$imageFile'),
     );
   }
 
-  brightness(context){
+  brightness(context) {
     return Expanded(
       flex: 3,
       child: SliderTheme(
@@ -224,11 +344,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Spacer(flex: 1),
+              //Spacer(),
               _buildSat(context),
-              Spacer(flex: 1),
+              //Spacer(),
               _buildBrightness(context),
-              Spacer(flex: 1),
+              //Spacer(),
               _buildCon(context),
               //Spacer(flex: 3),
             ],
@@ -295,7 +415,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
         Padding(
           padding:
-          EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
+              EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
           child: Text(con.toStringAsFixed(2)),
         ),
       ],
@@ -339,7 +459,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
         Padding(
           padding:
-          EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
+              EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
           child: Text(sat.toStringAsFixed(2)),
         ),
       ],
@@ -383,7 +503,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
         Padding(
           padding:
-          EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
+              EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.08),
           child: Text(bright.toStringAsFixed(2)),
         ),
       ],
@@ -394,11 +514,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
   void gallery() async {
     final image = await imagePicker.pickImage(source: ImageSource.gallery);
     imageFile = image != null ? File(image.path) : null;
-    if (imageFile != null) {
-      setState(() {
-        // state = AppState.picked;
-      });
-    }
+    setState(() {
+      compressFile = image != null ? File(image.path) : null;
+    });
   }
 
   // Crop The Image Portion
@@ -469,7 +587,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
   // Image Save Module
   Future saveImage() async {
     // renameImage();
-    await GallerySaver.saveImage(imageFile!.path, albumName: "OTWPhotoEditingDemo");
+    await GallerySaver.saveImage(imageFile!.path,
+        albumName: "OTWPhotoEditingDemo");
   }
 
 /*Future _resizeImage() async {
@@ -500,4 +619,29 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
   }*/
 
+}
+
+class TimeLogger {
+  String tag;
+
+  TimeLogger([this.tag = "", this.start = 0]);
+
+  int start;
+
+  void startRecoder() {
+    start = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  void logTime() {
+    if (start == null) {
+      print('The start is null, you must start recoder first.');
+      return;
+    }
+    final diff = DateTime.now().millisecondsSinceEpoch - start;
+    if (tag != "") {
+      print("$tag : $diff ms");
+    } else {
+      print("run time $diff ms");
+    }
+  }
 }
