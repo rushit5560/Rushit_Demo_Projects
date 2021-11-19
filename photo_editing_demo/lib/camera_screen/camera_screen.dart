@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image/image.dart' as imageLib;
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:share/share.dart';
 
@@ -97,6 +95,10 @@ class _CameraScreenState extends State<CameraScreen> {
     if (image != null) {
       setState(() {
         file = File(image.path);
+        print('Camera File Path : $file');
+        print('Camera Image Path : ${image.path}');
+        Fluttertoast.showToast(msg: '${image.path}', toastLength: Toast.LENGTH_LONG);
+        renameImage();
       });
     } else {}
   }
@@ -128,6 +130,7 @@ class _CameraScreenState extends State<CameraScreen> {
     } else if(imagefile.isEmpty) {
       file = file;
     }
+    renameImage();
   }
 
   // Image Crop Function
@@ -167,13 +170,14 @@ class _CameraScreenState extends State<CameraScreen> {
         // state = AppState.cropped;
       });
     }
+    renameImage();
   }
 
+  // Share The
   shareImage() async {
     try{
       // final ByteData bytes = await rootBundle.load('${file!.path}');
       await Share.shareFiles(['${file!.path}']);
-
     } catch(e) {
       print('Share Error : $e');
     }
@@ -187,11 +191,15 @@ class _CameraScreenState extends State<CameraScreen> {
   }
   Future renameImage() async {
     String ogPath = file!.path;
+    String frontPath = ogPath.split('cache')[0];
+    print('frontPath: $frontPath');
     List<String> ogPathList = ogPath.split('/');
+    print('ogPathList: $ogPathList');
     String ogExt = ogPathList[ogPathList.length - 1].split('.')[1];
+    print('ogExt: $ogExt');
     DateTime today = new DateTime.now();
     String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
-    file = await file!.rename("PhotoEditingDemo_$dateSlug.$ogExt");
+    file = await file!.rename("${frontPath}cache/PhotoEditingDemo_$dateSlug.$ogExt");
     print('File : $file');
     print('File Path : ${file!.path}');
   }
