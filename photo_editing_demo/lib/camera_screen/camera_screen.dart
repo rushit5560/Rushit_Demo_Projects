@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:share/share.dart';
+import 'image_editor_screen.dart';
 
 
 class CameraScreen extends StatefulWidget {
@@ -22,7 +23,6 @@ class _CameraScreenState extends State<CameraScreen> {
   final ImagePicker imagePicker = ImagePicker();
   List<Filter> filters = presetFiltersList;
   String? fileName;
-
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +74,12 @@ class _CameraScreenState extends State<CameraScreen> {
                             await filterImage(context);
                           },
                           icon: Icon(Icons.filter_alt_rounded),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Get.to(()=> ImageEditorScreen(), arguments: file);
+                          },
+                          icon: Icon(Icons.create),
                         ),
                       ],
                     ),
@@ -189,6 +195,8 @@ class _CameraScreenState extends State<CameraScreen> {
     // renameImage();
     await GallerySaver.saveImage(file!.path, albumName: "OTWPhotoEditingDemo");
   }
+
+  // Rename Capture Image
   Future renameImage() async {
     String ogPath = file!.path;
     String frontPath = ogPath.split('cache')[0];
