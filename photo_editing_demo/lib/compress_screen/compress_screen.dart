@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 class CompressScreen extends StatefulWidget {
   File imageFile;
@@ -20,6 +21,14 @@ class _CompressScreenState extends State<CompressScreen> {
     return Scaffold(
       appBar:AppBar(
         title: Text("Compress Image"),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await saveImage();
+            },
+            icon: Icon(Icons.save),
+          ),
+        ],
       ),
       body: Container(
         margin: EdgeInsets.only(left: 5, right: 5),
@@ -57,5 +66,12 @@ class _CompressScreenState extends State<CompressScreen> {
         ),
       ),
     );
+  }
+
+
+  Future saveImage() async {
+    // renameImage();
+    await GallerySaver.saveImage(widget.compressFile.path,
+        albumName: "OTWPhotoEditingDemo");
   }
 }

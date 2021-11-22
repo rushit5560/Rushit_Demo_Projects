@@ -12,8 +12,6 @@ import 'package:file_picker/file_picker.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
-
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -82,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 15),
 
             // Collage Button
-            GestureDetector(
+            /*GestureDetector(
               onTap: () {
                 Get.to(()=> CollageScreen());
               },
@@ -102,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 15),*/
 
             // Video
             GestureDetector(
@@ -130,29 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                   child: Text(
                     'Trim Videos',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            // Extra
-            GestureDetector(
-              onTap: () {
-                Get.to(()=> ExtraScreen());
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-                  child: Text(
-                    'Extra Screen',
                     style: TextStyle(
                       color: Colors.white,
                     ),

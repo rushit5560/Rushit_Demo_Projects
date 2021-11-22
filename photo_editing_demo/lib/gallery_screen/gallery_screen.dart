@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:neon/neon.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
 import 'dart:typed_data';
@@ -13,12 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_editing_demo/compress_screen/compress_screen.dart';
-import 'package:photo_editing_demo/neon_text_screen/neon_text_screen.dart';
-import 'package:photo_editing_demo/resize_screen/resize_screen.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:image/image.dart' as imageLib;
-import 'package:path_provider/path_provider.dart' as path_provider;
 
 class GalleryScreen extends StatefulWidget {
   @override
@@ -82,7 +78,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     Icon(Icons.crop),
     Icon(Icons.filter_alt_rounded),
     Icon(Icons.brightness_4),
-    Icon(Icons.zoom_out),
+    //Icon(Icons.zoom_out),
     Icon(Icons.blur_on),
     Icon(Icons.compress_outlined),
     Icon(Icons.photo_size_select_actual),
@@ -183,14 +179,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                 setState(() {
                                   i = 2;
                                 });
-                              } else if(i == 3){
+                              } /*else if(i == 3){
+                                print("====");
                                 zoomImage();
-                              } else if(i == 4){
+                              }*/ else if(i == 3){
                                 print(index);
                                 setState(() {
-                                  i = 4;
+                                  i = 3;
                                 });
-                              } else if(i ==5){
+                              } else if(i ==4){
                                 compressImage(imageFile!).then((value) {
                                   Get.to(() => CompressScreen(
                                     imageFile: imageFile!,
@@ -200,7 +197,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                     // setState(() {});
                                   });
                                 });
-                              } else if(i == 6){
+                              } else if(i == 5){
                                 resizeImage(imageFile!).then((value) {
                                   Fluttertoast.showToast(
                                       msg: "Original length: ${imageTemp!.length}\n"
@@ -356,11 +353,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
   indexFunction(context) {
     print("index===$i");
     return Container(
-      child: i == 4
+      child: i == 3
           ? Slider(
               value: blurImage,
               max: 30,
-              onChanged: (value) => setState(() => blurImage = value),
+              onChanged: (value) => setState(() {
+                blurImage = value;
+                //imageFile=File("$blurImage");
+              }),
             )
           : i == 2
               ? brightness(context)
@@ -467,7 +467,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   zoomImage() {
     return PhotoView(
-      imageProvider: AssetImage('$imageFile'),
+      imageProvider: AssetImage("$imageFile"),
     );
   }
 
@@ -721,6 +721,23 @@ class _GalleryScreenState extends State<GalleryScreen> {
       });
       print(imageFile!.path);
     }
+    renameImage();
+  }
+
+  // Rename Gallery Image
+  Future renameImage() async {
+    String ogPath = imageFile!.path;
+    String frontPath = ogPath.split('cache')[0];
+    print('frontPath: $frontPath');
+    List<String> ogPathList = ogPath.split('/');
+    print('ogPathList: $ogPathList');
+    String ogExt = ogPathList[ogPathList.length - 1].split('.')[1];
+    print('ogExt: $ogExt');
+    DateTime today = new DateTime.now();
+    String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
+    imageFile = await imageFile!.rename("${frontPath}cache/PhotoEditingDemo_$dateSlug.$ogExt");
+    print('File : $imageFile');
+    print('File Path : ${imageFile!.path}');
   }
 
   // Image Save Module
