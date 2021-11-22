@@ -5,8 +5,10 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_editing_demo/collage_screen/collage_screen.dart';
 import 'package:photo_editing_demo/gallery_screen/gallery_screen.dart';
+import 'package:photo_editing_demo/video_screen/video_screen.dart';
 import 'package:photo_editing_demo/zz_extra_screen/extra_screen.dart';
 import '../camera_screen/camera_screen.dart';
+import 'package:file_picker/file_picker.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -102,6 +104,41 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 15),
 
+            // Video
+            GestureDetector(
+              onTap: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.video,
+                  allowCompression: false,
+                );
+                if (result != null) {
+                  File file = File(result.files.single.path!);
+                  // Navigator.of(context).push(
+                  //   MaterialPageRoute(builder: (context) {
+                  //     return VideoScreen(file: file);
+                  //   }),
+                  // );
+                  Get.to(()=> VideoScreen(file: file));
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                  child: Text(
+                    'Trim Videos',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+
             // Extra
             GestureDetector(
               onTap: () {
@@ -123,6 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 15),
           ],
         ),
       ),
