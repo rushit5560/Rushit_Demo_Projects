@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:neon/neon.dart';
 import 'package:gallery_saver/gallery_saver.dart';
@@ -11,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_editing_demo/compress_screen/compress_screen.dart';
+import 'package:photo_editing_demo/neon_text_screen/neon_text_screen.dart';
+import 'package:photo_editing_demo/resize_screen/resize_screen.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:image/image.dart' as imageLib;
@@ -23,9 +27,10 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   final ImagePicker imagePicker = ImagePicker();
-  int? index;
+  int? i;
   File? imageFile;
   File? compressFile;
+  imageLib.Image ? resize;
   List<Filter> filters = presetFiltersList;
   String? fileName;
   Uint8List? targetlUinit8List;
@@ -73,7 +78,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   double blurImage = 0;
-
+  List<Icon> iconList = [
+    Icon(Icons.crop),
+    Icon(Icons.filter_alt_rounded),
+    Icon(Icons.brightness_4),
+    Icon(Icons.zoom_out),
+    Icon(Icons.blur_on),
+    Icon(Icons.compress_outlined),
+    Icon(Icons.photo_size_select_actual),
+  ];
   //File ? file;
 
   @override
@@ -98,6 +111,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       body: imageFile != null
           ? Container(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 9,
@@ -146,8 +160,83 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   SizedBox(
                     height: 10,
                   ),
+
                   indexFunction(context),
+
                   Container(
+                    height: 40,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemCount: iconList.length,
+                        itemBuilder: (context, index){
+
+                          return GestureDetector(
+                            onTap: (){
+                              i = index;
+
+                              if(i == 0){
+                                _cropImage();
+                              } else if(i == 1){
+                                filterImage(context);
+                              } else if(i == 2){
+                                setState(() {
+                                  i = 2;
+                                });
+                              } else if(i == 3){
+                                zoomImage();
+                              } else if(i == 4){
+                                print(index);
+                                setState(() {
+                                  i = 4;
+                                });
+                              } else if(i ==5){
+                                compressImage(imageFile!).then((value) {
+                                  Get.to(() => CompressScreen(
+                                    imageFile: imageFile!,
+                                    compressFile: compressFile!,
+                                  ))!
+                                      .then((value) {
+                                    // setState(() {});
+                                  });
+                                });
+                              } else if(i == 6){
+                                resizeImage(imageFile!).then((value) {
+                                  Fluttertoast.showToast(
+                                      msg: "Original length: ${imageTemp!.length}\n"
+                                          "Resize length: ${resize!.length}",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 5,
+                                      backgroundColor: Colors.blue,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0
+                                  );
+                                  /*Get.to(() => ResizeScreen(
+                                resize: resize!
+                              ))!.then((value) {
+                                Fluttertoast.showToast(
+                                    msg: "Resize length: ${resize!.length}",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0
+                                );
+                              });*/
+                                });
+                              }
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(left: 10, right: 10),
+                               child: iconList[index],
+                            ),
+                          );
+                        }),
+                  ),
+
+                  /*Container(
                     margin: EdgeInsets.only(left: 10, right: 10),
                     child: Row(
                       //mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -184,19 +273,22 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         ),
                         IconButton(
                           onPressed: () {
-                            setState(() {
+                            Slider(
+                              value: blurImage,
+                              max: 30,
+                              onChanged: (value) => setState(() => blurImage = value),
+                            );
+                            *//*setState(() {
                               //index = 1;
                               index = 0;
                               //print(isBlur);
-                            });
+                            });*//*
                           },
                           icon: Icon(Icons.blur_on),
                         ),
                         IconButton(
                           onPressed: () async {
-                            // setState(() {
-                            //   isCompress = true;
-                            // });
+
                             compressImage(imageFile!).then((value) {
                               Get.to(() => CompressScreen(
                                         imageFile: imageFile!,
@@ -209,9 +301,47 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           },
                           icon: Icon(Icons.compress_outlined),
                         ),
+
+                        IconButton(
+                          onPressed: () async {
+                            resizeImage(imageFile!).then((value) {
+                              Fluttertoast.showToast(
+                                  msg: "Original length: ${imageTemp!.length}\n"
+                                      "Resize length: ${resize!.length}",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 5,
+                                  backgroundColor: Colors.blue,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0
+                              );
+                              Get.to(() => ResizeScreen(
+                                resize: resize!
+                              ))!.then((value) {
+                                Fluttertoast.showToast(
+                                    msg: "Resize length: ${resize!.length}",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0
+                                );
+                              });
+                            });
+                          },
+                          icon: Icon(Icons.photo_size_select_actual),
+                        ),
+
+                        IconButton(
+                          onPressed: () async {
+                            Get.to(() => NeonText());
+                          },
+                          icon: Icon(Icons.text_fields),
+                        ),
                       ],
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             )
@@ -224,17 +354,26 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   indexFunction(context) {
+    print("index===$i");
     return Container(
-      child: index == 0
+      child: i == 4
           ? Slider(
               value: blurImage,
               max: 30,
               onChanged: (value) => setState(() => blurImage = value),
             )
-          : index == 1
+          : i == 2
               ? brightness(context)
               : Container(),
     );
+  }
+  imageLib.Image? imageTemp;
+  Future resizeImage(File file)async{
+    imageTemp = imageLib.decodeImage(file.readAsBytesSync());
+    imageLib.Image resized_img = imageLib.copyResize(imageTemp!,height: 800);
+    resize= resized_img;
+    print(resized_img.length);
+    print(imageTemp!.length);
   }
 
   Future compressImage(File file) async {
