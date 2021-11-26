@@ -36,6 +36,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         initialStrokeWidth: 2,
         initialColor: Colors.green,
         initialPaintMode: PaintMode.freeStyle,
+        placeholderWidget: Container(
+          child: Text("jdjdh"),
+        ),
       ),
     );
   }

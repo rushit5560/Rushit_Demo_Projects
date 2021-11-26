@@ -17,6 +17,9 @@ import 'package:photofilters/photofilters.dart';
 import 'package:image/image.dart' as imageLib;
 
 class GalleryScreen extends StatefulWidget {
+  File file;
+  File? compressFile;
+  GalleryScreen({required this.file, required this.compressFile});
   @override
   _GalleryScreenState createState() => _GalleryScreenState();
 }
@@ -24,8 +27,8 @@ class GalleryScreen extends StatefulWidget {
 class _GalleryScreenState extends State<GalleryScreen> {
   final ImagePicker imagePicker = ImagePicker();
   int? i;
-  File? imageFile;
-  File? compressFile;
+  //File? imageFile;
+
   imageLib.Image ? resize;
   List<Filter> filters = presetFiltersList;
   String? fileName;
@@ -93,10 +96,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () => gallery(),
-            icon: Icon(Icons.camera_alt_rounded),
-          ),
-          IconButton(
             onPressed: () async {
               await saveImage();
             },
@@ -104,7 +103,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
         ],
       ),
-      body: imageFile != null
+      body: widget.file.toString().isNotEmpty
           ? Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +125,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               colorBlendMode: bright > 0
                                   ? BlendMode.lighten
                                   : BlendMode.darken,
-                              image: ExtendedFileImageProvider(imageFile!),
+                              image: ExtendedFileImageProvider(widget.file),
                               extendedImageEditorKey: editorKey,
                               mode: ExtendedImageMode.editor,
                               fit: BoxFit.contain,
@@ -188,17 +187,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                   i = 3;
                                 });
                               } else if(i ==4){
-                                compressImage(imageFile!).then((value) {
+                                compressImage(widget.file).then((value) {
                                   Get.to(() => CompressScreen(
-                                    imageFile: imageFile!,
-                                    compressFile: compressFile!,
+                                    imageFile: widget.file,
+                                    compressFile: widget.compressFile!,
                                   ))!
                                       .then((value) {
                                     // setState(() {});
                                   });
                                 });
                               } else if(i == 5){
-                                resizeImage(imageFile!).then((value) {
+                                resizeImage(widget.file).then((value) {
                                   Fluttertoast.showToast(
                                       msg: "Original length: ${imageTemp!.length}\n"
                                           "Resize length: ${resize!.length}",
@@ -393,10 +392,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
     print(file.absolute.path);
     print("Compress path : ${result!.lengthSync()}");
     setState(() {
-      compressFile = result;
+      widget.compressFile = result;
     });
     setState(() {});
-    print("compressFile: ${compressFile!.lengthSync()}");
+    print("compressFile: ${widget.compressFile!.lengthSync()}");
     // setState(() {
     //
     // });
@@ -467,7 +466,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   zoomImage() {
     return PhotoView(
-      imageProvider: AssetImage("$imageFile"),
+      imageProvider: AssetImage("${widget.file}"),
     );
   }
 
@@ -650,18 +649,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   // Getting the image from the Gallery
-  void gallery() async {
-    final image = await imagePicker.pickImage(source: ImageSource.gallery);
-    imageFile = image != null ? File(image.path) : null;
-    setState(() {
-      compressFile = image != null ? File(image.path) : null;
-    });
-  }
+
 
   // Crop The Image Portion
   Future<Null> _cropImage() async {
     File? croppedFile = await ImageCropper.cropImage(
-        sourcePath: imageFile!.path,
+        sourcePath: widget.file.path,
         aspectRatioPresets: Platform.isAndroid
             ? [
                 CropAspectRatioPreset.square,
@@ -690,7 +683,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           title: 'Crop',
         ));
     if (croppedFile != null) {
-      imageFile = croppedFile;
+      widget.file = croppedFile;
       setState(() {
         // state = AppState.cropped;
       });
@@ -699,8 +692,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   // Filter The Image Portion
   Future filterImage(context) async {
-    fileName = basename(imageFile!.path);
-    var image = imageLib.decodeImage(imageFile!.readAsBytesSync());
+    fileName = basename(widget.file.path);
+    var image = imageLib.decodeImage(widget.file.readAsBytesSync());
     image = imageLib.copyResize(image!, width: 600);
     Map imagefile = await Navigator.push(
       context,
@@ -710,23 +703,26 @@ class _GalleryScreenState extends State<GalleryScreen> {
           image: image!,
           filters: presetFiltersList,
           filename: fileName!,
-          loader: Center(child: CircularProgressIndicator()),
-          fit: BoxFit.contain,
+          loader: Center(child: CircularProgressIndicator(color: Colors.black,)),
+          fit: BoxFit.cover,
+          circleShape: false,
+          appBarColor: Colors.black,
+
         ),
       ),
     );
     if (imagefile.isNotEmpty && imagefile.containsKey('image_filtered')) {
       setState(() {
-        imageFile = imagefile['image_filtered'];
+        widget.file = imagefile['image_filtered'];
       });
-      print(imageFile!.path);
+      print(widget.file.path);
     }
     renameImage();
   }
 
   // Rename Gallery Image
   Future renameImage() async {
-    String ogPath = imageFile!.path;
+    String ogPath = widget.file.path;
     String frontPath = ogPath.split('cache')[0];
     print('frontPath: $frontPath');
     List<String> ogPathList = ogPath.split('/');
@@ -735,15 +731,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
     print('ogExt: $ogExt');
     DateTime today = new DateTime.now();
     String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
-    imageFile = await imageFile!.rename("${frontPath}cache/PhotoEditingDemo_$dateSlug.$ogExt");
-    print('File : $imageFile');
-    print('File Path : ${imageFile!.path}');
+    widget.file = await widget.file.rename("${frontPath}cache/PhotoEditingDemo_$dateSlug.$ogExt");
+    print('File : ${widget.file}');
+    print('File Path : ${widget.file.path}');
   }
 
   // Image Save Module
   Future saveImage() async {
     // renameImage();
-    await GallerySaver.saveImage(imageFile!.path,
+    await GallerySaver.saveImage(widget.file.path,
         albumName: "OTWPhotoEditingDemo");
   }
 

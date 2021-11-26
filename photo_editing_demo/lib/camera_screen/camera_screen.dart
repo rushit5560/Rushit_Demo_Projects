@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/rendering.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image/image.dart' as imageLib;
 import 'package:flutter/material.dart';
@@ -15,11 +14,14 @@ import 'image_editor_screen.dart';
 
 
 class CameraScreen extends StatefulWidget {
+  File file;
+  CameraScreen({required this.file});
+
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
 class _CameraScreenState extends State<CameraScreen> {
-  File? file;
+  //File? file;
   final ImagePicker imagePicker = ImagePicker();
   List<Filter> filters = presetFiltersList;
   String? fileName;
@@ -32,10 +34,6 @@ class _CameraScreenState extends State<CameraScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () => camera(),
-            icon: Icon(Icons.camera_alt_rounded),
-          ),
-          IconButton(
             onPressed: () async => await saveImage(),
             icon: Icon(Icons.save),
           ),
@@ -45,7 +43,7 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
         ],
       ),
-      body: file != null
+      body: widget.file.toString().isNotEmpty
           ? Container(
               child: Column(
                 children: [
@@ -54,8 +52,8 @@ class _CameraScreenState extends State<CameraScreen> {
                     child: Container(
                       color: Colors.black,
                       width: Get.width,
-                      child: file != null
-                          ? Image.file(file!)
+                      child:  widget.file.toString().isNotEmpty
+                          ? Image.file(widget.file)
                           : null,
                     ),
                   ),
@@ -77,7 +75,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
                         IconButton(
                           onPressed: () {
-                            Get.to(()=> ImageEditorScreen(), arguments: file);
+                            Get.to(()=> ImageEditorScreen(), arguments: widget.file);
                           },
                           icon: Icon(Icons.create),
                         ),
@@ -96,23 +94,12 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   // Getting Image From Camera
-  void camera() async {
-    final image = await imagePicker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      setState(() {
-        file = File(image.path);
-        print('Camera File Path : $file');
-        print('Camera Image Path : ${image.path}');
-        Fluttertoast.showToast(msg: '${image.path}', toastLength: Toast.LENGTH_LONG);
-        renameImage();
-      });
-    } else {}
-  }
+
 
   // Add Filter in Image
   Future filterImage(context) async {
-    fileName = basename(file!.path);
-    var image = imageLib.decodeImage(file!.readAsBytesSync());
+    fileName = basename(widget.file.path);
+    var image = imageLib.decodeImage(widget.file.readAsBytesSync());
     image = imageLib.copyResize(image!, width: 600);
     Map imagefile = await Navigator.push(
       context,
@@ -130,19 +117,19 @@ class _CameraScreenState extends State<CameraScreen> {
     );
     if (imagefile.isNotEmpty && imagefile.containsKey('image_filtered')) {
       setState(() {
-        file = imagefile['image_filtered'];
+        widget.file = imagefile['image_filtered'];
       });
-      print(file!.path);
-    } else if(imagefile.isEmpty) {
+      print(widget.file.path);
+    } /*else if(imagefile.isEmpty) {
       file = file;
-    }
+    }*/
     renameImage();
   }
 
   // Image Crop Function
   Future<Null> _cropImage() async {
     File ? croppedFile = await ImageCropper.cropImage(
-        sourcePath: file!.path,
+        sourcePath: widget.file.path,
         aspectRatioPresets: Platform.isAndroid
         ? [
         CropAspectRatioPreset.square,
@@ -171,7 +158,7 @@ class _CameraScreenState extends State<CameraScreen> {
           title: 'Crop',
         ));
     if (croppedFile != null) {
-      file = croppedFile;
+      widget.file = croppedFile;
       setState(() {
         // state = AppState.cropped;
       });
@@ -183,7 +170,7 @@ class _CameraScreenState extends State<CameraScreen> {
   shareImage() async {
     try{
       // final ByteData bytes = await rootBundle.load('${file!.path}');
-      await Share.shareFiles(['${file!.path}']);
+      await Share.shareFiles(['${widget.file.path}']);
     } catch(e) {
       print('Share Error : $e');
     }
@@ -193,12 +180,12 @@ class _CameraScreenState extends State<CameraScreen> {
   // Image Save Module
   Future saveImage() async {
     // renameImage();
-    await GallerySaver.saveImage(file!.path, albumName: "OTWPhotoEditingDemo");
+    await GallerySaver.saveImage(widget.file.path, albumName: "OTWPhotoEditingDemo");
   }
 
   // Rename Capture Image
   Future renameImage() async {
-    String ogPath = file!.path;
+    String ogPath = widget.file.path;
     String frontPath = ogPath.split('cache')[0];
     print('frontPath: $frontPath');
     List<String> ogPathList = ogPath.split('/');
@@ -207,9 +194,9 @@ class _CameraScreenState extends State<CameraScreen> {
     print('ogExt: $ogExt');
     DateTime today = new DateTime.now();
     String dateSlug = "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year.toString()}_${today.hour.toString().padLeft(2, '0')}-${today.minute.toString().padLeft(2, '0')}-${today.second.toString().padLeft(2, '0')}";
-    file = await file!.rename("${frontPath}cache/PhotoEditingDemo_$dateSlug.$ogExt");
-    print('File : $file');
-    print('File Path : ${file!.path}');
+    widget.file = await widget.file.rename("${frontPath}cache/PhotoEditingDemo_$dateSlug.$ogExt");
+    print('File : ${widget.file}');
+    print('File Path : ${widget.file.path}');
   }
 
 }
