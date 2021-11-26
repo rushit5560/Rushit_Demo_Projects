@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_editing_demo/collage_screen/collage_screen.dart';
+import 'package:photo_editing_demo/collage_screen/collage_screen_controller.dart';
 import 'package:photo_editing_demo/gallery_screen/gallery_screen.dart';
 import 'package:photo_editing_demo/video_screen/video_screen.dart';
 import 'package:photo_editing_demo/zz_extra_screen/extra_screen.dart';
@@ -21,6 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
   File? file;
   File? compressFile;
   final ImagePicker imagePicker = ImagePicker();
+
+
+  CollageScreenController collageScreenController = Get.put(CollageScreenController());
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 15),
 
             // Collage Button
-            /*GestureDetector(
+            GestureDetector(
               onTap: () {
-                Get.to(()=> CollageScreen());
+                //Get.to(()=> CollageScreen());
+                selectImages();
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -104,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 15),*/
+            const SizedBox(height: 15),
 
             // Video
             GestureDetector(
@@ -144,6 +149,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  // Select Multiple Images From Gallery
+  void selectImages() async {
+    final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+    try{
+      if(selectedImages!.isEmpty){
+      } else {
+        setState(() {
+          collageScreenController.imageFileList.clear();
+          collageScreenController.imageFileList.addAll(selectedImages);
+        });
+        Get.to(()=> CollageScreen(collageScreenController: collageScreenController,));
+      }
+    } catch(e) {
+      print('Error : $e');
+    }
+
+    print('Images List Length : ${collageScreenController.imageFileList.length}');
   }
 
   void camera() async {
