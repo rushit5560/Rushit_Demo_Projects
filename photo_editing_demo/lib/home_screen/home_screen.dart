@@ -161,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
           collageScreenController.imageFileList.clear();
           collageScreenController.imageFileList.addAll(selectedImages);
         });
-        Get.to(()=> CollageScreen(collageScreenController: collageScreenController,));
+        Get.to(()=> CollageScreen());
       }
     } catch(e) {
       print('Error : $e');
