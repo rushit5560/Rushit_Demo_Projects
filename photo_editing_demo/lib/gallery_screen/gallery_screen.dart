@@ -27,6 +27,7 @@ class GalleryScreen extends StatefulWidget {
 class _GalleryScreenState extends State<GalleryScreen> {
   final ImagePicker imagePicker = ImagePicker();
   int? i;
+  int ? imageRatioIndex;
   //File? imageFile;
 
   imageLib.Image ? resize;
@@ -85,6 +86,30 @@ class _GalleryScreenState extends State<GalleryScreen> {
     Icon(Icons.blur_on),
     Icon(Icons.compress_outlined),
     Icon(Icons.photo_size_select_actual),
+    Icon(Icons.image_aspect_ratio)
+  ];
+
+  List<String> imageRatio = [
+    "1:1",
+    "9:16",
+    "16:9",
+    "4:5",
+    "16:9",
+    "2:3",
+    "16:9",
+    "1:1.41"
+  ];
+
+  List<String> imageRatioSize = [
+    "IG post",
+    "IG story",
+    "Movie screen",
+    "FB post",
+    "FB cover",
+    "Pinterest post",
+    "Twitter post",
+    "A4 size"
+
   ];
   //File ? file;
 
@@ -112,34 +137,290 @@ class _GalleryScreenState extends State<GalleryScreen> {
                     flex: 9,
                     child: Stack(
                       children: [
-                        ColorFiltered(
-                          colorFilter:
-                              ColorFilter.matrix(calculateContrastMatrix(con)),
+
+                        imageRatioIndex == 0 ?
+                            AspectRatio(
+                                aspectRatio:1/1,
+                                child: ColorFiltered(
+                                  colorFilter:
+                                  ColorFilter.matrix(calculateContrastMatrix(con)),
+                                  child: ColorFiltered(
+                                    colorFilter: ColorFilter.matrix(
+                                        calculateSaturationMatrix(sat)),
+                                    child: ExtendedImage(
+                                      color: bright > 0
+                                          ? Colors.white.withOpacity(bright)
+                                          : Colors.black.withOpacity(-bright),
+                                      colorBlendMode: bright > 0
+                                          ? BlendMode.lighten
+                                          : BlendMode.darken,
+                                      image: ExtendedFileImageProvider(widget.file),
+                                      extendedImageEditorKey: editorKey,
+                                      //mode: ExtendedImageMode.editor,
+                                      fit: BoxFit.contain,
+                                      initEditorConfigHandler:
+                                          (ExtendedImageState? state) {
+                                        return EditorConfig(
+                                          maxScale: 8.0,
+                                          //cropRectPadding: const EdgeInsets.all(20.0),
+                                          hitTestSize: 20.0,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                ) :
+                        imageRatioIndex == 1 ?
+                        AspectRatio(
+                          aspectRatio:9/16,
                           child: ColorFiltered(
-                            colorFilter: ColorFilter.matrix(
-                                calculateSaturationMatrix(sat)),
-                            child: ExtendedImage(
-                              color: bright > 0
-                                  ? Colors.white.withOpacity(bright)
-                                  : Colors.black.withOpacity(-bright),
-                              colorBlendMode: bright > 0
-                                  ? BlendMode.lighten
-                                  : BlendMode.darken,
-                              image: ExtendedFileImageProvider(widget.file),
-                              extendedImageEditorKey: editorKey,
-                              mode: ExtendedImageMode.editor,
-                              fit: BoxFit.contain,
-                              initEditorConfigHandler:
-                                  (ExtendedImageState? state) {
-                                return EditorConfig(
-                                  maxScale: 8.0,
-                                  //cropRectPadding: const EdgeInsets.all(20.0),
-                                  hitTestSize: 20.0,
-                                );
-                              },
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
                             ),
                           ),
+                        ):
+                        imageRatioIndex == 2 ?
+                        AspectRatio(
+                          aspectRatio:16/9,
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ):
+                        imageRatioIndex == 3 ?
+                        AspectRatio(
+                          aspectRatio:4/5,
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ):imageRatioIndex == 4 ?
+                        AspectRatio(
+                          aspectRatio:16/9,
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ):imageRatioIndex == 5 ?
+                        AspectRatio(
+                          aspectRatio:2/3,
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ):imageRatioIndex == 6 ?
+                        AspectRatio(
+                          aspectRatio:16/9,
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ):imageRatioIndex == 7 ?
+                        AspectRatio(
+                          aspectRatio:1/1.41,
+                          child: ColorFiltered(
+                            colorFilter:
+                            ColorFilter.matrix(calculateContrastMatrix(con)),
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.matrix(
+                                  calculateSaturationMatrix(sat)),
+                              child: ExtendedImage(
+                                color: bright > 0
+                                    ? Colors.white.withOpacity(bright)
+                                    : Colors.black.withOpacity(-bright),
+                                colorBlendMode: bright > 0
+                                    ? BlendMode.lighten
+                                    : BlendMode.darken,
+                                image: ExtendedFileImageProvider(widget.file),
+                                extendedImageEditorKey: editorKey,
+                                //mode: ExtendedImageMode.editor,
+                                fit: BoxFit.contain,
+                                initEditorConfigHandler:
+                                    (ExtendedImageState? state) {
+                                  return EditorConfig(
+                                    maxScale: 8.0,
+                                    //cropRectPadding: const EdgeInsets.all(20.0),
+                                    hitTestSize: 20.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ):
+                              Container(
+                                  child: ColorFiltered(
+                                    colorFilter:
+                                    ColorFilter.matrix(calculateContrastMatrix(con)),
+                                    child: ColorFiltered(
+                                      colorFilter: ColorFilter.matrix(
+                                          calculateSaturationMatrix(sat)),
+                                      child: ExtendedImage(
+                                        color: bright > 0
+                                            ? Colors.white.withOpacity(bright)
+                                            : Colors.black.withOpacity(-bright),
+                                        colorBlendMode: bright > 0
+                                            ? BlendMode.lighten
+                                            : BlendMode.darken,
+                                        image: ExtendedFileImageProvider(widget.file),
+                                        extendedImageEditorKey: editorKey,
+                                        mode: ExtendedImageMode.editor,
+                                        fit: BoxFit.contain,
+                                        initEditorConfigHandler:
+                                            (ExtendedImageState? state) {
+                                          return EditorConfig(
+                                            maxScale: 8.0,
+                                            //cropRectPadding: const EdgeInsets.all(20.0),
+                                            hitTestSize: 20.0,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
                         ),
+
                         Positioned.fill(
                           child: BackdropFilter(
                             filter: ImageFilter.blur(
@@ -222,6 +503,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                 );
                               });*/
                                 });
+                              } else if(i == 6){
+                                setState(() {
+                                  i = 6;
+                                });
+                                //imageSizeRatio();
                               }
                             },
                             child: Container(
@@ -349,6 +635,96 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
+  sizeRatioList(){
+    return Container(
+      height: 32,
+      /*child: Row(
+        children: [
+          GestureDetector(
+            onTap: (){
+              AspectRatio(
+                  aspectRatio: 1/1,
+                child: Image.file(widget.file),
+              );
+            },
+              child: Text("1:1"))
+        ],
+      ),*/
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          itemCount: imageRatio.length,
+          itemBuilder: (context, index){
+
+            return GestureDetector(
+              onTap: (){
+                imageRatioIndex = index;
+
+                if(imageRatioIndex == 0){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =0 ;
+
+                  });
+                } else if(imageRatioIndex == 1){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =1 ;
+
+                  });
+                }
+                else if(imageRatioIndex == 2){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =2 ;
+
+                  });
+                }  else if(imageRatioIndex == 3){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =3 ;
+
+                  });
+                } else if(imageRatioIndex == 4){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =4 ;
+
+                  });
+                } else if(imageRatioIndex == 5){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =5 ;
+
+                  });
+                } else if(imageRatioIndex == 6){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =6 ;
+
+                  });
+                } else if(imageRatioIndex == 7){
+                  print(imageRatioIndex);
+                  setState(() {
+                    imageRatioIndex =7 ;
+
+                  });
+                }
+              },
+              child: Container(
+                margin: EdgeInsets.only(left: 10, right: 10),
+                child: Column(
+                  children: [
+                    Text(imageRatioSize[index]),
+                    Text(imageRatio[index]),
+                  ],
+                ),
+              ),
+            );
+          }),
+    );
+  }
+
   indexFunction(context) {
     print("index===$i");
     return Container(
@@ -363,9 +739,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
             )
           : i == 2
               ? brightness(context)
-              : Container(),
+              : i == 6 ?
+               sizeRatioList() : Container(),
     );
   }
+
+
   imageLib.Image? imageTemp;
   Future resizeImage(File file)async{
     imageTemp = imageLib.decodeImage(file.readAsBytesSync());
