@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "511322528961",
+    "project_id": "fb-chat-demo-23-2-22",
+    "storage_bucket": "fb-chat-demo-23-2-22.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511322528961:android:9aff3f545736f20397c840",
+        "android_client_info": {
+          "package_name": "com.example.firebase_chat_demo_rushit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "511322528961-1idq4o6prqlqpfq5h3r6iit80j47hjih.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEmJPjxXk0ZlMUh3q_VsmhvKwUMlsRFyU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "511322528961-1idq4o6prqlqpfq5h3r6iit80j47hjih.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
