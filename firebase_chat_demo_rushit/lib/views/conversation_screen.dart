@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_chat_demo_rushit/helper/constants.dart';
 import 'package:firebase_chat_demo_rushit/services/database.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../widgets/widget.dart';
 
 
@@ -28,10 +29,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
           itemCount: snapshot.data!.doc.length,
           itemBuilder: (context, index) {
             return MessageTile(
-                message: snapshot.data!.doc[index].data["message"],
-              isSendByMe: snapshot.data!.doc[index].data["sendBy"] == Constants.myName,
-            );
-          },
+                    message: snapshot.data!.doc[index].data["message"],
+                    isSendByMe: snapshot.data!.doc[index].data["sendBy"] == Constants.myName,
+                  );
+                },
         ) : Container();
       },
     );
@@ -117,9 +118,30 @@ class MessageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      width: Get.width,
+      alignment: isSendByMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: isSendByMe ? Colors.blueAccent : Colors.black45,
+          borderRadius: isSendByMe
+              ? const BorderRadius.only(
+                  topRight: Radius.circular(23),
+                  topLeft: Radius.circular(23),
+                  bottomLeft: Radius.circular(23),
+                )
+              : const BorderRadius.only(
+                  topRight: Radius.circular(23),
+                  topLeft: Radius.circular(23),
+                  bottomRight: Radius.circular(23),
+                ),
+        ),
+        child: Text(
           message,
-        style: mediumTextStyle(),
+          style: mediumTextStyle(),
+        ),
       ),
     );
   }
