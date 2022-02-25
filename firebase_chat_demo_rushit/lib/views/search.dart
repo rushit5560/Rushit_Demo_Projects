@@ -65,7 +65,7 @@ class _SearchScreenState extends State<SearchScreen> {
       };
 
       DatabaseMethods().createChatRoom(chatRoomId, chatRoomMap);
-      Get.to(()=> ConversationScreen());
+      Get.to(()=> ConversationScreen(chatRoomId: chatRoomId));
     } else {
       print("you cannot send message to yourself");
     }

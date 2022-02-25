@@ -21,12 +21,38 @@ class DatabaseMethods {
     });
   }
 
-  // Create ChatRoom of 2 Users
+  /// Create ChatRoom of 2 Users
   createChatRoom(String chatRoomId, chatRoomMap) {
     FirebaseFirestore.instance.collection("ChatRoom")
         .doc(chatRoomId).set(chatRoomMap).catchError((e){
           print('Error : $e');
     });
+  }
+
+  addConversationMessages(String chatRoomId, messageMap) {
+    FirebaseFirestore.instance.collection("ChatRoom")
+        .doc(chatRoomId).collection("chats")
+        .add(messageMap).catchError((e){
+          print('Error : $e');
+    });
+  }
+
+  getConversationMessages(String chatRoomId) async {
+    // print('Database chatRoomId : $chatRoomId');
+    // print('snapshot :${FirebaseFirestore.instance.collection("ChatRoom")
+    //     .doc(chatRoomId).collection("chats")
+    //     .snapshots()}');
+    return await FirebaseFirestore.instance
+        .collection("ChatRoom")
+        .doc(chatRoomId)
+        .collection("chats")
+        .orderBy("time", descending: true)
+        .snapshots();
+
+    // return await FirebaseFirestore.instance.collection("ChatRoom")
+    //     .doc(chatRoomId)
+    //     .collection("chats")
+    //     .get();
   }
 
 }
