@@ -1,3 +1,5 @@
+import 'package:firebase_chat_demo_rushit/helper/helper_functions.dart';
+import 'package:firebase_chat_demo_rushit/views/chat_room_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,8 +12,31 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  bool userIsLoggedIn = false;
+
+  @override
+  void initState() {
+    getLoggedInState();
+    super.initState();
+  }
+
+  getLoggedInState() async {
+    await HelperFunctions.getUserLoggedFromSharedPreference()
+    .then((value) {
+      setState(() {
+        userIsLoggedIn = value ?? false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +48,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Authenticate(),
+      home: userIsLoggedIn ?  ChatRoom() : Authenticate(),
     );
   }
 }

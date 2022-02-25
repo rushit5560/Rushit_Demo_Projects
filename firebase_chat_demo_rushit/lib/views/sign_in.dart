@@ -1,6 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_chat_demo_rushit/services/auth.dart';
+import 'package:firebase_chat_demo_rushit/services/database.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../helper/helper_functions.dart';
 import '../widgets/widget.dart';
+import 'chat_room_screen.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggle;
@@ -17,6 +23,40 @@ class _SignInState extends State<SignIn> {
   TextEditingController emailFieldController = TextEditingController();
   TextEditingController passwordFieldController = TextEditingController();
 
+  AuthMethods authMethods = AuthMethods();
+  DatabaseMethods databaseMethods = DatabaseMethods();
+  QuerySnapshot? snapshotUserInfo;
+
+
+  bool isLoading = false;
+
+  signInButtonClick() {
+    if(formKey.currentState!.validate()){
+      setState(() {
+        isLoading = true;
+      });
+
+      databaseMethods.getUserByUserEmail(emailFieldController.text.trim().toLowerCase())
+      .then((value) {
+        snapshotUserInfo = value;
+        HelperFunctions.saveUserNameInSharedPreference(snapshotUserInfo!.docs[0].get("name"));
+      });
+
+      authMethods.signInWithEmailAndPassword(
+              emailFieldController.text.trim().toLowerCase(),
+              passwordFieldController.text.trim())
+          .then((value) {
+            if(value != null){
+              databaseMethods.getUserByUserEmail(emailFieldController.text.trim().toLowerCase());
+              HelperFunctions.saveUserLoggedInSharedPreference(true);
+              HelperFunctions.saveUserEmailInSharedPreference(
+                  emailFieldController.text.trim().toLowerCase());
+
+              Get.off(() => ChatRoom());
+            }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +74,27 @@ class _SignInState extends State<SignIn> {
                   controller: emailFieldController,
                   style: simpleTextStyle(),
                   decoration: textFieldInputDecoration('Email'),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return "Field is Required!";
+                    } else if (!value.contains('@')) {
+                      return "Enter valid email!";
+                    }
+                    return null;
+                  },
                 ),
                 TextFormField(
                   controller: passwordFieldController,
                   style: simpleTextStyle(),
                   decoration: textFieldInputDecoration('Password'),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return "Field is Required!";
+                    } else if (value.length < 5) {
+                      return "password length more then 5 character!";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 10),
                 Container(
@@ -50,19 +106,24 @@ class _SignInState extends State<SignIn> {
                 ),
 
                 const SizedBox(height: 10),
-                Container(
-                  alignment: Alignment.center,
-                  width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(35),
-                    color: Colors.blue,
-                  ),
-                  child: const Text(
-                      'Sign In',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17
+                GestureDetector(
+                  onTap: () {
+                    signInButtonClick();
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(35),
+                      color: Colors.blue,
+                    ),
+                    child: const Text(
+                        'Sign In',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17
+                      ),
                     ),
                   ),
                 ),

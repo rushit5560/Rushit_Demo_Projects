@@ -1,3 +1,4 @@
+import 'package:firebase_chat_demo_rushit/helper/helper_functions.dart';
 import 'package:firebase_chat_demo_rushit/services/auth.dart';
 import 'package:firebase_chat_demo_rushit/services/database.dart';
 import 'package:firebase_chat_demo_rushit/views/chat_room_screen.dart';
@@ -39,6 +40,10 @@ class _SignUpState extends State<SignUp> {
       passwordFieldController.text.trim(),
       ).then((value) {
 
+        HelperFunctions.saveUserLoggedInSharedPreference(true);
+        HelperFunctions.saveUserEmailInSharedPreference(emailFieldController.text.trim().toLowerCase());
+        HelperFunctions.saveUserNameInSharedPreference(usernameFieldController.text.trim());
+        
         /// Add User in Firebase Database
         databaseMethods.uploadUserInfo(data);
 

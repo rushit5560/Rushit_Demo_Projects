@@ -1,3 +1,5 @@
+import 'package:firebase_chat_demo_rushit/helper/constants.dart';
+import 'package:firebase_chat_demo_rushit/helper/helper_functions.dart';
 import 'package:firebase_chat_demo_rushit/services/auth.dart';
 import 'package:firebase_chat_demo_rushit/views/search.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +19,22 @@ class _ChatRoomState extends State<ChatRoom> {
   AuthMethods authMethods = AuthMethods();
 
   @override
+  void initState() {
+    getUserInfo();
+    super.initState();
+  }
+
+  getUserInfo() async {
+    Constants.myName = await HelperFunctions.getUserNameFromSharedPreference() ?? "";
+    setState(() {});
+
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat Room'),
+        title: const Text('Chat Room Screen'),
         actions: [
           GestureDetector(
             onTap: () {
