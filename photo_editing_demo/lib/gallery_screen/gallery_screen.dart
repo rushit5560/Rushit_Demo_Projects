@@ -265,7 +265,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               ),
                             ),
                           ),
-                        ):imageRatioIndex == 4 ?
+                        ):
+                        imageRatioIndex == 4 ?
                         AspectRatio(
                           aspectRatio:16/9,
                           child: ColorFiltered(
